@@ -1,0 +1,9 @@
+export const Colors = {
+  BACKGROUND: '#F5F5F5',
+  ACTIVE: '#DEDEDE',
+  TEXT: '#000000',
+  INPUT_BORDER: '#000000',
+  CURRENCY_LIST: '#E7E7E7',
+  WHITE: '#FFFFFF',
+  PLACEHOLDER: '#666666',
+};
