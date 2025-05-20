@@ -2,14 +2,15 @@ import {
   createStaticNavigation,
   StaticParamList,
 } from '@react-navigation/native';
-import {createNativeStackNavigator} from '@react-navigation/native-stack';
+import {createStackNavigator} from '@react-navigation/stack';
+import {KeyboardProvider} from 'react-native-keyboard-controller';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import CurrencySelectScreen from './src/screens/CurrencySelect/CurrencySelectScreen.tsx';
 import ExchangeScreen from './src/screens/Exchange/ExchangeScreen.tsx';
 import {Colors} from './src/utils/colors.tsx';
 import {fonts} from './src/utils/fonts.ts';
 
-const RootStack = createNativeStackNavigator({
+const RootStack = createStackNavigator({
   screens: {
     Exchange: {
       screen: ExchangeScreen,
@@ -45,7 +46,9 @@ const Navigation = createStaticNavigation(RootStack);
 export default function App() {
   return (
     <SafeAreaProvider>
-      <Navigation />
+      <KeyboardProvider>
+        <Navigation />
+      </KeyboardProvider>
     </SafeAreaProvider>
   );
 }

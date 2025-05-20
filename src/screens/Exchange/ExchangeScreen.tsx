@@ -1,18 +1,27 @@
-import {Image, StyleSheet, View} from 'react-native';
+import {Image, Keyboard, StyleSheet, View} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {observer} from 'mobx-react-lite';
+import {KeyboardAvoidingView} from 'react-native-keyboard-controller';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import useExchangeController from './useExchangeController.tsx';
 import {images} from '../../assets/images.ts';
 import CustomTextInput from '../../components/CustomTextInput.tsx';
 import Pressable from '../../components/Pressable.tsx';
 import {Text} from '../../components/Text.tsx';
-import {useCurrenciesStore} from '../../store/CurrenciesStore.tsx';
 import {Colors} from '../../utils/colors.tsx';
 
 const ExchangeScreen = observer(() => {
   const insets = useSafeAreaInsets();
+  const {
+    lastCachedResponse,
+    swapCurrencies,
+    digitalAmount,
+    to,
+    from,
+    amount,
+    setAmount,
+  } = useExchangeController();
   const navigation = useNavigation();
-  const {to, from} = useCurrenciesStore();
 
   const renderCurrencyButton = (type: 'to' | 'from') => {
     const currency = type === 'to' ? to : from;
@@ -33,41 +42,65 @@ const ExchangeScreen = observer(() => {
   };
 
   return (
-    <View style={[styles.container, {paddingTop: insets.top}]}>
-      <View style={styles.inputsRow}>
-        <View>
-          <Text style={styles.label} font={'MM16'} color={Colors.TEXT}>
-            {'From:'}
-          </Text>
-          {renderCurrencyButton('from')}
+    <KeyboardAvoidingView
+      behavior={'padding'}
+      keyboardVerticalOffset={100}
+      style={[styles.container, {paddingTop: insets.top}]}>
+      <Pressable
+        style={styles.topPressable}
+        onPress={() => Keyboard.dismiss()}
+        activeOpacity={1}>
+        <View style={styles.inputsRow}>
+          <View>
+            <Text style={styles.label} font={'MM16'} color={Colors.TEXT}>
+              {'From:'}
+            </Text>
+            {renderCurrencyButton('from')}
+          </View>
+          <Pressable
+            onPress={() => swapCurrencies()}
+            hitSlop={10}
+            style={styles.swipeButton}>
+            <Image style={styles.arrows} source={images.arrowsLeftRight} />
+          </Pressable>
+          <View>
+            <Text style={styles.label} font={'MM16'} color={Colors.TEXT}>
+              {'To:'}
+            </Text>
+            {renderCurrencyButton('to')}
+          </View>
         </View>
-        <Pressable hitSlop={10} style={styles.swipeButton}>
-          <Image style={styles.arrows} source={images.arrowsLeftRight} />
-        </Pressable>
-        <View>
-          <Text style={styles.label} font={'MM16'} color={Colors.TEXT}>
-            {'To:'}
-          </Text>
-          {renderCurrencyButton('to')}
-        </View>
-      </View>
-      <Text style={styles.label} font={'MM16'} color={Colors.TEXT}>
-        {'Amount:'}
-      </Text>
-      <CustomTextInput onTextChanges={() => {}} value={''} placeholder={'1'} />
-      <Text style={styles.topCurrText} font={'MM16'} color={Colors.TEXT}>
-        {'1$ ='}
-      </Text>
-      <Text font={'MM42'} color={Colors.TEXT}>
-        {'3,98 zł'}
-      </Text>
-    </View>
+        <Text style={styles.label} font={'MM16'} color={Colors.TEXT}>
+          {'Amount:'}
+        </Text>
+        <CustomTextInput
+          inputProps={{keyboardType: 'decimal-pad'}}
+          onTextChanges={setAmount}
+          value={amount}
+          placeholder={'1'}
+        />
+        <Text style={styles.topCurrText} font={'MM16'} color={Colors.TEXT}>
+          {`${digitalAmount}$ =`}
+        </Text>
+        <Text font={'MM42'} color={Colors.TEXT}>
+          {lastCachedResponse?.rates && lastCachedResponse.rates[to.code]
+            ? `${(digitalAmount * lastCachedResponse.rates[to.code])
+                .toFixed(2)
+                .replace('.', ',')} ${to.code}`
+            : `0${to.code}`}
+        </Text>
+      </Pressable>
+    </KeyboardAvoidingView>
   );
 });
 
 export default ExchangeScreen;
 
 const styles = StyleSheet.create({
+  topPressable: {
+    flex: 1,
+    justifyContent: 'center',
+  },
   inputsRow: {
     flexDirection: 'row',
     alignItems: 'center',

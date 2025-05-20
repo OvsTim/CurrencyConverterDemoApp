@@ -68,10 +68,9 @@ const styles = StyleSheet.create({
     paddingVertical: 0,
     width: '100%',
   },
-  // eslint-disable-next-line react-native/no-color-literals
   inputContainer: {
     alignItems: 'center',
-    backgroundColor: 'transparent',
+    backgroundColor: Colors.WHITE,
     borderColor: Colors.INPUT_BORDER,
     borderRadius: 8,
     borderWidth: 2,

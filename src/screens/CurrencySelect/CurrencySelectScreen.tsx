@@ -76,6 +76,11 @@ const CurrencySelectScreen = observer(({route}: Props) => {
           overScrollMode={'never'}
           showsVerticalScrollIndicator={false}
           ItemSeparatorComponent={() => <View style={styles.divider} />}
+          ListEmptyComponent={
+            <Text style={styles.emptyPh} font={'MM16'} color={Colors.TEXT}>
+              {'No items available'}
+            </Text>
+          }
           data={currencies}
           renderItem={renderItem}
         />
@@ -87,6 +92,10 @@ const CurrencySelectScreen = observer(({route}: Props) => {
 export default CurrencySelectScreen;
 
 const styles = StyleSheet.create({
+  emptyPh: {
+    padding: 16,
+    alignSelf: 'center',
+  },
   container: {
     flex: 1,
   },
