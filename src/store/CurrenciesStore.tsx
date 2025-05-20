@@ -8,6 +8,7 @@ import data from '../assets/currencies.json';
 import {Currency} from '../types/Currency.ts';
 import {ServerResponse} from '../types/ServerResponse.ts';
 
+const fullList = data;
 const storage = new MMKV();
 
 const mmkvStorage: StorageController = {
@@ -33,15 +34,19 @@ class CurrenciesStore {
   from: Currency;
   to: Currency;
   lastCachedResponse?: ServerResponse;
+  currencyList: Currency[];
 
   constructor() {
     this.from = data.filter((it: Currency) => it.code === 'USD')[0];
     this.to = data.filter((it: Currency) => it.code === 'EUR')[0];
     this.lastCachedResponse = undefined;
+    this.currencyList = data;
     makeObservable(this, {
       from: observable,
       to: observable,
       lastCachedResponse: observable,
+      currencyList: observable,
+
       setFrom: action.bound,
       setTo: action.bound,
       swapCurrencies: action.bound,
@@ -80,6 +85,10 @@ class CurrenciesStore {
   setLatestCachedResponse = (lastCachedResponse: ServerResponse) => {
     if (lastCachedResponse.success === true) {
       this.lastCachedResponse = {...lastCachedResponse};
+      const currCodes = Object.keys(lastCachedResponse.rates);
+      this.currencyList = [
+        ...fullList.filter(it => currCodes.includes(it.code)),
+      ];
     } else {
       if (lastCachedResponse.error) {
         Alert.alert(
