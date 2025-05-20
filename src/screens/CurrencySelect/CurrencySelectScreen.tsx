@@ -1,4 +1,3 @@
-import {useState} from 'react';
 import {
   FlatList,
   Image,
@@ -6,13 +5,15 @@ import {
   StyleSheet,
   View,
 } from 'react-native';
-import {StaticScreenProps} from '@react-navigation/native';
+import {StaticScreenProps, useNavigation} from '@react-navigation/native';
+import {observer} from 'mobx-react-lite';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
-import data from '../../assets/currencies.json';
+import useCurrencySelectController from './useCurrencySelectController.tsx';
 import {images} from '../../assets/images.ts';
 import Pressable from '../../components/Pressable.tsx';
 import {Text} from '../../components/Text.tsx';
 import {ThrottledSearchInput} from '../../components/ThrottledSearchInput.tsx';
+import {useCurrenciesStore} from '../../store/CurrenciesStore.tsx';
 import {Currency} from '../../types/Currency.ts';
 import {Colors} from '../../utils/colors.tsx';
 type Props = StaticScreenProps<{
@@ -20,17 +21,25 @@ type Props = StaticScreenProps<{
   type: 'from' | 'to';
 }>;
 
-const CurrencySelectScreen = ({route}: Props) => {
-  const fullList = data;
+const CurrencySelectScreen = observer(({route}: Props) => {
   const insets = useSafeAreaInsets();
-  const [currencies, setCurrencies] = useState<Currency[]>(fullList);
+  const navigation = useNavigation();
+  const {from, to, setFrom, setTo} = useCurrenciesStore();
+  const {currencies, search, setSearch, onSearchChange} =
+    useCurrencySelectController();
 
-  const renderItem = ({item, index}: ListRenderItemInfo<Currency>) => {
+  const renderItem = ({item}: ListRenderItemInfo<Currency>) => {
+    const currency = route.params.type === 'from' ? from : to;
     return (
       <Pressable
-        onPress={() => {}}
+        onPress={() => {
+          if (route.params.type === 'from') {
+            setFrom(item);
+          } else setTo(item);
+          navigation.goBack();
+        }}
         style={
-          index === 0
+          item.code === currency.code
             ? [styles.currContainer, styles.currContainerSelected]
             : styles.currContainer
         }>
@@ -42,7 +51,11 @@ const CurrencySelectScreen = ({route}: Props) => {
         </View>
         <Image
           style={styles.currRadioBtn}
-          source={index === 0 ? images.radioCheck : images.radioUncheck}
+          source={
+            item.code === currency.code
+              ? images.radioCheck
+              : images.radioUncheck
+          }
         />
       </Pressable>
     );
@@ -52,8 +65,10 @@ const CurrencySelectScreen = ({route}: Props) => {
     <View style={[styles.container, {marginBottom: insets.bottom + 42}]}>
       <ThrottledSearchInput
         styleContainer={styles.search}
-        value={''}
+        value={search}
         placeholder={'USD'}
+        onTextChanges={setSearch}
+        onThrottledChange={onSearchChange}
       />
       <View
         style={[styles.currListContainer, {marginBottom: insets.bottom + 42}]}>
@@ -67,7 +82,7 @@ const CurrencySelectScreen = ({route}: Props) => {
       </View>
     </View>
   );
-};
+});
 
 export default CurrencySelectScreen;
 

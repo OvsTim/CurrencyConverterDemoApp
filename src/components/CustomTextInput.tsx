@@ -35,7 +35,7 @@ export default function BaseInput(props: Props) {
       }}
       style={[
         {
-          width: width - 32,
+          width: width - 40,
         },
         styles.inputContainer,
         props.styleContainer,
